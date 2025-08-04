@@ -1,0 +1,29 @@
+{
+  "name": "career-os-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "13.x",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "chart.js": "^4.x",
+    "react-chartjs-2": "^5.x",
+    "tailwindcss": "^3.x",
+    "postcss": "^8.x",
+    "autoprefixer": "^10.x",
+    "clsx": "^1.x"
+  },
+  "devDependencies": {
+    "typescript": "^5.x",
+    "@types/react": "^18.x",
+    "@types/node": "^20.x",
+    "eslint": "8.x",
+    "eslint-config-next": "13.x"
+  }
+}
