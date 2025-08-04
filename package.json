@@ -6,24 +6,29 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next build && next export",
+    "predeploy": "npm run build && npm run export",
+    "deploy": "gh-pages -d out"
   },
   "dependencies": {
-    "next": "13.x",
-    "react": "18.x",
-    "react-dom": "18.x",
-    "chart.js": "^4.x",
-    "react-chartjs-2": "^5.x",
-    "tailwindcss": "^3.x",
-    "postcss": "^8.x",
-    "autoprefixer": "^10.x",
-    "clsx": "^1.x"
+    "next": "^13.4.19",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "chart.js": "^4.4.1",
+    "react-chartjs-2": "^5.2.0",
+    "tailwindcss": "^3.3.3",
+    "postcss": "^8.4.29",
+    "autoprefixer": "^10.4.15",
+    "clsx": "^2.0.0",
+    "gh-pages": "^5.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.x",
-    "@types/react": "^18.x",
-    "@types/node": "^20.x",
-    "eslint": "8.x",
-    "eslint-config-next": "13.x"
+    "typescript": "^5.2.2",
+    "@types/react": "^18.2.21",
+    "@types/node": "^20.5.7",
+    "eslint": "^8.48.0",
+    "eslint-config-next": "^13.4.19",
+    "@types/chart.js": "^2.9.41"
   }
 }
