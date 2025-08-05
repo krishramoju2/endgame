@@ -22,12 +22,12 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
+  <div className="layout">
+    <header className="p-4 bg-gray-100 border-b">
+      <h1 className="text-xl font-semibold">CareerOS</h1>
+    </header>
+    <main className="p-4">{children}</main>
+  </div>
+);
 
-  <>
-        CareerOS
-
-
-      {children}
-  </> 
-  );
 }
