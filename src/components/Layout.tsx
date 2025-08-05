@@ -23,11 +23,11 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
 
-
+  <>
         CareerOS
 
 
       {children}
-
+  </> 
   );
 }
