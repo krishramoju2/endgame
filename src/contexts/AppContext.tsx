@@ -1,8 +1,11 @@
 import React, { createContext, useState, useContext, ReactNode, useMemo } from "react";
 import { Career, CAREERS } from "../data/careers";
 
+// ==================== Type Definitions ====================
+type Speaker = "user" | "expert";
+
 interface ChatMessage {
-  speaker: "user" | "expert";
+  speaker: Speaker;
   message: string;
   timestamp: number;
 }
@@ -27,48 +30,58 @@ interface AppContextType {
   currentCareerId: string | null;
   setCurrentCareerId: (id: string | null) => void;
   chatHistory: ChatMessage[];
-  addChatMessage: (msg: Omit<ChatMessage, 'timestamp'>) => void;
+  addChatMessage: (msg: Omit<ChatMessage, "timestamp">) => void;
   clearChatHistory: () => void;
   analytics: Record<string, AnalyticsData>;
-  recordInteraction: (careerId: string, question: string, response: string, rating: number) => void;
+  recordInteraction: (
+    careerId: string,
+    question: string,
+    response: string,
+    rating: number
+  ) => void;
   theme: string;
   setTheme: (theme: string) => void;
   currentCareer: Career | undefined;
 }
 
+// ==================== Context Creation ====================
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// ==================== Provider Component ====================
 export function AppProvider({ children }: { children: ReactNode }) {
+  // State Management
   const [currentCareerId, setCurrentCareerId] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [theme, setTheme] = useState<string>("light");
 
+  // Derived State
   const currentCareer = useMemo(() => 
-    CAREERS.find(c => c.id === currentCareerId),
+    CAREERS.find((c) => c.id === currentCareerId),
     [currentCareerId]
   );
 
+  // Analytics Initialization
   const [analytics, setAnalytics] = useState<Record<string, AnalyticsData>>(() => {
-    const initialData: Record<string, AnalyticsData> = {};
-    CAREERS.forEach(c => {
-      initialData[c.id] = {
+    return CAREERS.reduce<Record<string, AnalyticsData>>((acc, career) => {
+      acc[career.id] = {
         totalQuestions: 0,
         avgRating: 0,
         lastUsed: null,
-        responseCounts: new Array(c.responses.length).fill(0),
+        responseCounts: new Array(career.responses.length).fill(0),
         interactions: [],
       };
-    });
-    return initialData;
+      return acc;
+    }, {});
   });
 
-  const addChatMessage = (msg: Omit<ChatMessage, 'timestamp'>) => {
-    setChatHistory(prev => [
-      ...prev, 
+  // ==================== Action Handlers ====================
+  const addChatMessage = (msg: Omit<ChatMessage, "timestamp">) => {
+    setChatHistory((prev) => [
+      ...prev,
       {
         ...msg,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     ]);
   };
 
@@ -77,25 +90,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const recordInteraction = (
-    careerId: string, 
-    question: string, 
-    response: string, 
+    careerId: string,
+    question: string,
+    response: string,
     rating: number
   ) => {
-    if (!CAREERS.some(c => c.id === careerId)) return;
+    const careerExists = CAREERS.some((c) => c.id === careerId);
+    if (!careerExists) return;
 
-    setAnalytics(prev => {
+    setAnalytics((prev) => {
       const careerData = prev[careerId];
-      const responseIndex = CAREERS.find(c => c.id === careerId)?.responses.indexOf(response) ?? -1;
+      const career = CAREERS.find((c) => c.id === careerId);
+      const responseIndex = career?.responses.indexOf(response) ?? -1;
+
+      // Calculate new analytics values
       const newTotal = careerData.totalQuestions + 1;
       const newAvg = (careerData.avgRating * careerData.totalQuestions + rating) / newTotal;
-      
+
+      // Update response counts
       const newResponseCounts = [...careerData.responseCounts];
       if (responseIndex >= 0) {
         newResponseCounts[responseIndex] += 1;
       }
 
-      const newInteraction = {
+      // Create new interaction
+      const newInteraction: Interaction = {
         timestamp: new Date().toISOString(),
         question,
         response,
@@ -105,6 +124,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return {
         ...prev,
         [careerId]: {
+          ...careerData,
           totalQuestions: newTotal,
           avgRating: newAvg,
           lastUsed: new Date().toISOString(),
@@ -115,25 +135,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const contextValue = useMemo(() => ({
-    careers: CAREERS,
-    currentCareerId,
-    setCurrentCareerId,
-    chatHistory,
-    addChatMessage,
-    clearChatHistory,
-    analytics,
-    recordInteraction,
-    theme,
-    setTheme,
-    currentCareer
-  }), [
-    currentCareerId,
-    chatHistory,
-    analytics,
-    theme,
-    currentCareer
-  ]);
+  // ==================== Context Value ====================
+  const contextValue = useMemo<AppContextType>(
+    () => ({
+      careers: CAREERS,
+      currentCareerId,
+      setCurrentCareerId,
+      chatHistory,
+      addChatMessage,
+      clearChatHistory,
+      analytics,
+      recordInteraction,
+      theme,
+      setTheme,
+      currentCareer,
+    }),
+    [currentCareerId, chatHistory, analytics, theme, currentCareer]
+  );
 
   return (
     <AppContext.Provider value={contextValue}>
@@ -142,6 +160,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// ==================== Custom Hook ====================
 export function useAppContext() {
   const context = useContext(AppContext);
   if (!context) {
